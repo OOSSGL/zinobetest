@@ -50,3 +50,16 @@ def hash_language(language):
     m.update(language.encode('utf-8'))
 
     return m.hexdigest()
+
+
+def table_to_json(table, cur):
+    cur.execute('Select * from {}'.format(table))
+    # Python magic to convert sql result to json
+    data_json = [dict((cur.description[i][0], value) for i, value in enumerate(row))
+                 for row in cur.fetchall()]
+    return data_json
+
+
+def json_to_file(file_name, data):
+    with open('{}.json'.format(file_name), 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)

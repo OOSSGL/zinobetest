@@ -1,8 +1,9 @@
 import sqlite3
 import time
+import json
 import pandas as pd
 
-from countries import get_regions, get_country_and_language, hash_language
+from utilities import get_regions, get_country_and_language, hash_language, table_to_json, json_to_file
 
 # BD
 con = sqlite3.connect('zinobe.db')
@@ -10,7 +11,6 @@ con = sqlite3.connect('zinobe.db')
 if __name__ == '__main__':
     # Get regions
     regions = get_regions()
-    print(regions)
 
     # Get first country of each region
     countries = []
@@ -30,10 +30,21 @@ if __name__ == '__main__':
 
     # Create DataFrame
     df = pd.DataFrame(countries)
-
     print(df)
 
     df_times = df.agg({'time': ['sum', 'mean', 'min', 'max']})
     print(df_times)
 
+    # DataFrames to tables
+    df.to_sql(name='Countries', con=con, if_exists='replace')
+    df_times.to_sql(name='Times', con=con, if_exists='replace')
 
+    # DB tables to json
+    data_json = table_to_json('Countries', con.cursor())
+    data_times_json = table_to_json('Times', con.cursor())
+
+    con.close()
+
+    # Json to file
+    json_to_file('data', data_json)
+    json_to_file('data_times', data_times_json)
