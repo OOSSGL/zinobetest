@@ -36,19 +36,22 @@ def get_country_and_language(region):
     response = requests.request("GET", url)
 
     countries = json.loads(response.text)
+
+    # Return error if there is an error
+    if 'status' in countries:
+        return countries
+
     # Get name and first language of the first country of the region
     country = {
         'name': countries[0]['name'],
         'language': countries[0]['languages'][0]['name']
     }
-
     return country
 
 
 def hash_language(language):
     m = hashlib.sha1()
     m.update(language.encode('utf-8'))
-
     return m.hexdigest()
 
 
